@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>로딩 중...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; color: #374151;
+    }
+    .icon { font-size: 64px; margin-bottom: 20px; animation: pulse 2s infinite; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #1e3a8a; }
+    p { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #dbeafe;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .status { margin-top: 16px; font-size: 13px; color: #9ca3af; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  </style>
+</head>
+<body>
+  <div class="icon">🏥</div>
+  <h1>병원 블로그 자동화</h1>
+  <p>네이버 SEO · 의료광고법 준수 · AI 콘텐츠 생성</p>
+  <div class="spinner"></div>
+  <p class="status" id="status">서버 시작 중...</p>
+  <script>
+    const msgs = ['서버 시작 중...', '모듈 로딩 중...', '준비 완료 대기 중...'];
+    let i = 0;
+    setInterval(() => {
+      document.getElementById('status').textContent = msgs[i++ % msgs.length];
+    }, 1500);
+  </script>
+</body>
+</html>

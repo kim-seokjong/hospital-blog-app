@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+  <title>API 키 설정</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      color: #1f2937;
+    }
+    .card {
+      background: white; border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      padding: 40px; width: 480px;
+    }
+    .header { text-align: center; margin-bottom: 32px; }
+    .icon { font-size: 48px; margin-bottom: 12px; }
+    h1 { font-size: 22px; font-weight: 700; color: #1e3a8a; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #6b7280; }
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .get-key { font-size: 11px; color: #3b82f6; cursor: pointer; text-decoration: underline; }
+    input[type=password], input[type=text] {
+      width: 100%; padding: 12px 14px;
+      border: 2px solid #e5e7eb; border-radius: 10px;
+      font-size: 13px; font-family: monospace; color: #374151;
+      outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: #3b82f6; }
+    .hint { font-size: 11px; color: #9ca3af; margin-top: 5px; }
+    .toggle { font-size: 11px; color: #6b7280; cursor: pointer; margin-top: 4px; display: inline-block; }
+    .btn {
+      width: 100%; padding: 14px;
+      background: #2563eb; color: white;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s; margin-top: 8px;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn:disabled { background: #93c5fd; cursor: not-allowed; }
+    .notice {
+      margin-top: 20px; padding: 12px 14px;
+      background: #fef3c7; border: 1px solid #fcd34d;
+      border-radius: 10px; font-size: 12px; color: #92400e;
+    }
+    .success { display: none; text-align: center; padding: 20px; }
+    .success .check { font-size: 48px; margin-bottom: 12px; }
+    #status { text-align: center; font-size: 13px; margin-top: 12px; min-height: 20px; }
+    .error { color: #ef4444; }
+    .ok { color: #10b981; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="icon">🔑</div>
+    <h1>API 키 설정</h1>
+    <p class="subtitle">AI 기능 사용을 위해 API 키를 입력해주세요</p>
+  </div>
+
+  <div class="field">
+    <div class="label-row">
+      <label>Anthropic API 키 (Claude AI)</label>
+      <span class="get-key" onclick="openUrl('https://console.anthropic.com')">키 발급받기 →</span>
+    </div>
+    <input type="password" id="anthropic" placeholder="sk-ant-..." autocomplete="off" />
+    <span class="toggle" onclick="toggleVis('anthropic', this)">👁 표시</span>
+    <p class="hint">제목·본문 생성에 사용됩니다</p>
+  </div>
+
+  <div class="field">
+    <div class="label-row">
+      <label>OpenAI API 키 (DALL-E 3)</label>
+      <span class="get-key" onclick="openUrl('https://platform.openai.com/api-keys')">키 발급받기 →</span>
+    </div>
+    <input type="password" id="openai" placeholder="sk-..." autocomplete="off" />
+    <span class="toggle" onclick="toggleVis('openai', this)">👁 표시</span>
+    <p class="hint">이미지 생성에 사용됩니다</p>
+  </div>
+
+  <button class="btn" id="saveBtn" onclick="save()">저장하고 앱 시작</button>
+  <p id="status"></p>
+
+  <div class="notice">
+    🔒 API 키는 이 PC의 앱 데이터 폴더에만 저장되며 외부로 전송되지 않습니다.
+  </div>
+</div>
+
+<script>
+  // 저장된 키 불러오기
+  window.electronAPI.getConfig().then(config => {
+    if (config.ANTHROPIC_API_KEY) document.getElementById('anthropic').value = config.ANTHROPIC_API_KEY;
+    if (config.OPENAI_API_KEY) document.getElementById('openai').value = config.OPENAI_API_KEY;
+  });
+
+  function toggleVis(id, btn) {
+    const el = document.getElementById(id);
+    if (el.type === 'password') {
+      el.type = 'text';
+      btn.textContent = '🙈 숨기기';
+    } else {
+      el.type = 'password';
+      btn.textContent = '👁 표시';
+    }
+  }
+
+  function openUrl(url) {
+    window.electronAPI.openUrl(url);
+  }
+
+  async function save() {
+    const anthropic = document.getElementById('anthropic').value.trim();
+    const openai = document.getElementById('openai').value.trim();
+    const status = document.getElementById('status');
+    const btn = document.getElementById('saveBtn');
+
+    if (!anthropic || !openai) {
+      status.innerHTML = '<span class="error">⚠ 두 API 키를 모두 입력해주세요.</span>';
+      return;
+    }
+    if (!anthropic.startsWith('sk-ant-')) {
+      status.innerHTML = '<span class="error">⚠ Anthropic 키는 sk-ant- 로 시작해야 합니다.</span>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '서버 시작 중...';
+    status.innerHTML = '<span style="color:#6b7280">⏳ 앱을 시작합니다. 잠시 기다려주세요...</span>';
+
+    try {
+      await window.electronAPI.saveConfig({ ANTHROPIC_API_KEY: anthropic, OPENAI_API_KEY: openai });
+    } catch (e) {
+      status.innerHTML = '<span class="error">오류: ' + e.message + '</span>';
+      btn.disabled = false;
+      btn.textContent = '저장하고 앱 시작';
+    }
+  }
+</script>
+</body>
+</html>
