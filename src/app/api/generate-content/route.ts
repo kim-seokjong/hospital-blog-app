@@ -71,14 +71,18 @@ ${MEDICAL_COMPLIANCE_SYSTEM_PROMPT}
     const rawBody = textContent.text;
     // 마크다운 기호 제거 (AI 감지 방지)
     const body = rawBody
-      .replace(/^#{1,6}\s+/gm, '')       // # ## ### 헤더
-      .replace(/\*\*(.+?)\*\*/g, '$1')   // **볼드**
-      .replace(/\*(.+?)\*/g, '$1')       // *이탤릭*
-      .replace(/~~(.+?)~~/g, '$1')       // ~~취소선~~
-      .replace(/^[-*]{3,}\s*$/gm, '')    // --- *** 구분선
-      .replace(/^[\s]*[-*+]\s+/gm, '')   // 목록 기호 (- * +)
-      .replace(/^\d+\.\s+/gm, '')        // 번호 목록 (1. 2.)
-      .replace(/\n{3,}/g, '\n\n')        // 3줄 이상 빈줄 → 2줄로
+      .replace(/^#{1,6}\s+/gm, '')           // # ## ### 헤더
+      .replace(/\*\*(.+?)\*\*/gs, '$1')      // **볼드** (멀티라인 포함)
+      .replace(/__(.+?)__/gs, '$1')          // __볼드__
+      .replace(/\*(.+?)\*/gs, '$1')          // *이탤릭*
+      .replace(/_(.+?)_/gs, '$1')            // _이탤릭_
+      .replace(/~~(.+?)~~/gs, '$1')          // ~~취소선~~
+      .replace(/^[-*]{3,}\s*$/gm, '')        // --- *** 구분선
+      .replace(/^[\s]*[-*+]\s+/gm, '')       // 목록 기호 (- * +)
+      .replace(/^\d+\.\s+/gm, '')            // 번호 목록 (1. 2.)
+      .replace(/\*\*/g, '')                  // 남은 ** 모두 제거
+      .replace(/(?<!\[이미지[^\]]*)-{2,}/g, '') // 남은 -- --- 제거 (이미지 태그 제외)
+      .replace(/\n{3,}/g, '\n\n')            // 3줄 이상 빈줄 → 2줄로
       .trim();
     const charCount = body.replace(/\[이미지\s*\d+:[^\]]*\]/g, '').length;
     const compliance = checkCompliance(body);
