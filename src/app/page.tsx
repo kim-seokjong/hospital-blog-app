@@ -74,7 +74,7 @@ export default function HomePage() {
         fetch('/api/generate-content', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: selectedTitle.title, keyword, hospitalType, additionalInfo }),
+          body: JSON.stringify({ title: selectedTitle.title, keyword, hospitalType, additionalInfo, titleFormat: selectedTitle.seoDetails?.format }),
         }),
         fetch('/api/generate-tags', {
           method: 'POST',
