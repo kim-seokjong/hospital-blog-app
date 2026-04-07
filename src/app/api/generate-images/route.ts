@@ -30,7 +30,9 @@ async function generateWithFal(prompt: string): Promise<string> {
   }
 
   const data = await res.json();
-  return data.images[0].url as string;
+  const imageUrl = data.images?.[0]?.url;
+  if (!imageUrl) throw new Error('fal.ai 응답에 이미지 URL이 없습니다.');
+  return imageUrl as string;
 }
 
 // 본문에서 [이미지 N: 설명] 추출
@@ -186,7 +188,9 @@ async function generatePhotoImages(
         if (!res.ok) { errors.push(`img-${index + 1}: Pexels 요청 실패`); return; }
 
         const data = await res.json();
-        const photos = data.photos as Array<{ id: number; src: { large2x: string; landscape: string }; alt: string; photographer: string }>;
+        const photos = Array.isArray(data.photos)
+          ? data.photos as Array<{ id: number; src: { large2x: string; landscape: string }; alt: string; photographer: string }>
+          : [];
         if (photos.length > 0) {
           const photo = photos[Math.floor(Math.random() * photos.length)];
           images.push({

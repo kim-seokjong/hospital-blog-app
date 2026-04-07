@@ -153,12 +153,12 @@ export default function HomePage() {
 
   const stepDone = {
     keyword: titles.length > 0,
-    title: content !== null,
+    title: selectedTitle !== null,
     content: content !== null,
     image: images.length > 0,
   };
 
-  const stepActive = [true, titles.length > 0, content !== null, content !== null];
+  const stepActive = [true, titles.length > 0, selectedTitle !== null, content !== null];
 
   return (
     <div className="min-h-screen">

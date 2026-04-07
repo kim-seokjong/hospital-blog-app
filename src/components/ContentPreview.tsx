@@ -26,16 +26,18 @@ export default function ContentPreview({ content, onGenerateImages, onImagesUplo
   };
 
   const charColor =
-    content.charCount >= 1400 && content.charCount <= 1600 ? 'text-green-600' :
+    content.charCount >= 1500 && content.charCount <= 1800 ? 'text-green-600' :
     content.charCount >= 1200 ? 'text-amber-500' : 'text-red-500';
 
   const renderBody = (text: string) => {
     return text.split('\n').map((line, i) => {
-      if (line.startsWith('## ')) {
-        return <h2 key={i} className="text-base font-bold text-gray-800 mt-5 mb-2">{line.replace('## ', '')}</h2>;
-      }
-      if (line.startsWith('### ')) {
-        return <h3 key={i} className="text-sm font-semibold text-gray-700 mt-3 mb-1.5">{line.replace('### ', '')}</h3>;
+      // H3 세부소제목: ▶ 로 시작
+      if (line.startsWith('▶')) {
+        return (
+          <h3 key={i} className="text-sm font-semibold text-indigo-700 mt-3 mb-1 pl-1 border-l-2 border-indigo-300">
+            {line.replace(/^▶\s*/, '')}
+          </h3>
+        );
       }
       // 이미지 위치 표시
       if (/^\[이미지\s*\d+:/.test(line)) {
@@ -45,6 +47,13 @@ export default function ContentPreview({ content, onGenerateImages, onImagesUplo
             <span className="text-xs text-blue-600 font-medium">{line.replace(/[\[\]]/g, '')}</span>
           </div>
         );
+      }
+      // H2 소제목: 앞뒤 빈 줄 사이의 단독 줄 (15자 이상이고 ▶ 아님)
+      if (line.trim().length >= 10 && line.trim().length <= 45 && !line.startsWith('[')) {
+        const prevEmpty = i === 0 || text.split('\n')[i - 1]?.trim() === '';
+        if (prevEmpty) {
+          return <h2 key={i} className="text-base font-bold text-gray-800 mt-5 mb-2">{line}</h2>;
+        }
       }
       if (line.trim() === '') return <br key={i} />;
       return <p key={i} className="text-gray-700 leading-relaxed text-sm mb-1">{line}</p>;
@@ -69,7 +78,7 @@ export default function ContentPreview({ content, onGenerateImages, onImagesUplo
         <div className="flex flex-wrap gap-2">
           <span className={`text-xs font-bold px-2.5 py-1 rounded-full bg-gray-100 ${charColor}`}>
             {content.charCount.toLocaleString()}자
-            {content.charCount >= 1400 ? ' ✓' : content.charCount >= 1200 ? ' (1400+ 권장)' : ' ⚠'}
+            {content.charCount >= 1500 ? ' ✓' : content.charCount >= 1200 ? ' (1500+ 권장)' : ' ⚠'}
           </span>
           <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
             H2 {content.seoAnalysis.h2Count}개
@@ -78,7 +87,7 @@ export default function ContentPreview({ content, onGenerateImages, onImagesUplo
             H3 {content.seoAnalysis.h3Count}개
           </span>
           <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-            content.seoAnalysis.keywordCount >= 3 && content.seoAnalysis.keywordCount <= 6
+            content.seoAnalysis.keywordCount >= 4 && content.seoAnalysis.keywordCount <= 6
               ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
           }`}>
             키워드 {content.seoAnalysis.keywordCount}회
