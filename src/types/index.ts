@@ -55,6 +55,10 @@ export interface BlogContent {
     h3Count: number;
     estimatedReadingTime: number;
     structureScore: number;
+    firstParaKeyword: boolean;
+    subheadingWithKeyword: number;
+    longtailCoverage: number;
+    longtailTotal: number;
   };
 }
 

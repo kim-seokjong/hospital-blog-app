@@ -33,15 +33,22 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
 export default function SeoAnalysis({ content }: SeoAnalysisProps) {
   const { seoAnalysis, imageGuidelines } = content;
 
-  const keywordOk = seoAnalysis.keywordCount >= 3 && seoAnalysis.keywordCount <= 6;
+  const keywordOk = seoAnalysis.keywordCount >= 4 && seoAnalysis.keywordCount <= 6;
   const h2Ok = seoAnalysis.h2Count >= 4;
-  const charOk = content.charCount >= 1200;
+  const h3Ok = seoAnalysis.h3Count >= 2;
+  const charOk = content.charCount >= 1500;
+  const firstParaOk = seoAnalysis.firstParaKeyword;
+  const subheadingOk = seoAnalysis.subheadingWithKeyword >= 2;
+  const longtailOk = seoAnalysis.longtailCoverage >= 3;
 
   const overallScore = Math.round(
-    (seoAnalysis.structureScore * 0.3) +
-    (keywordOk ? 100 : 60) * 0.3 +
-    (charOk ? 100 : 60) * 0.2 +
-    (content.compliance.isCompliant ? 100 : 50) * 0.2
+    (seoAnalysis.structureScore * 0.25) +
+    (keywordOk ? 100 : 60) * 0.2 +
+    (charOk ? 100 : 60) * 0.15 +
+    (content.compliance.isCompliant ? 100 : 50) * 0.15 +
+    (firstParaOk ? 100 : 50) * 0.1 +
+    (subheadingOk ? 100 : 50) * 0.1 +
+    (longtailOk ? 100 : 50) * 0.05
   );
 
   return (
@@ -64,12 +71,15 @@ export default function SeoAnalysis({ content }: SeoAnalysisProps) {
         <div className="space-y-2 mb-4">
           <h4 className="text-xs font-bold text-gray-700 mb-2">상위노출 체크리스트</h4>
           {[
-            { ok: charOk, label: `글자수 ${content.charCount.toLocaleString()}자`, sub: '1,200~1,600자 권장' },
+            { ok: charOk, label: `글자수 ${content.charCount.toLocaleString()}자`, sub: '1,500자 이상 권장' },
             { ok: h2Ok, label: `H2 소제목 ${seoAnalysis.h2Count}개`, sub: '4~5개 권장' },
-            { ok: seoAnalysis.h3Count >= 2, label: `H3 소제목 ${seoAnalysis.h3Count}개`, sub: '2개 이상 권장' },
-            { ok: keywordOk, label: `키워드 ${seoAnalysis.keywordCount}회 등장`, sub: '3~6회 권장' },
+            { ok: h3Ok, label: `H3 세부소제목 ${seoAnalysis.h3Count}개`, sub: '2개 이상 권장' },
+            { ok: keywordOk, label: `핵심 키워드 ${seoAnalysis.keywordCount}회`, sub: '4~6회 권장' },
+            { ok: firstParaOk, label: '첫 단락 키워드 포함', sub: 'D.I.A+ 200자 가산점' },
+            { ok: subheadingOk, label: `소제목 키워드 포함 ${seoAnalysis.subheadingWithKeyword}개`, sub: '2개 이상 권장' },
+            { ok: longtailOk, label: `롱테일 키워드 ${seoAnalysis.longtailCoverage}/${seoAnalysis.longtailTotal}개`, sub: '3개 이상 권장' },
             { ok: content.compliance.isCompliant, label: '의료광고법 준수', sub: '금지어 없음' },
-            { ok: imageGuidelines.placementHints.length >= 4, label: `이미지 위치 ${imageGuidelines.placementHints.length}곳 지정`, sub: '6곳 이상 권장' },
+            { ok: imageGuidelines.placementHints.length >= 4, label: `이미지 위치 ${imageGuidelines.placementHints.length}곳`, sub: '5곳 이상 권장' },
           ].map(({ ok, label, sub }, i) => (
             <div key={i} className={`flex items-center gap-2 p-2 rounded-lg ${ok ? 'bg-green-50' : 'bg-amber-50'}`}>
               <span className={`text-sm flex-shrink-0 ${ok ? 'text-green-600' : 'text-amber-500'}`}>

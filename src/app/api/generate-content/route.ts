@@ -51,6 +51,14 @@ export async function POST(req: NextRequest) {
     const format: TitleFormat = titleFormat || '정보형';
     const formatGuide = buildFormatSpecificStructure(format, keyword);
 
+    const longtailKeywords = [
+      `${keyword} 원인`,
+      `${keyword} 증상`,
+      `${keyword} 치료`,
+      `${keyword} 관리`,
+      `${keyword} 예방`,
+    ];
+
     const systemPrompt = `당신은 해당 진료과에서 10년 이상 임상 경험을 가진 전문의이자 의학 콘텐츠 전문 작가입니다.
 환자들이 실제로 궁금해하는 내용을 의학적으로 정확하면서도 이해하기 쉽게 설명합니다.
 
@@ -63,21 +71,24 @@ ${MEDICAL_COMPLIANCE_SYSTEM_PROMPT}
 - 생활 지도 내용은 의학적 근거를 바탕으로 구체적으로 제시
 - 독자가 읽고 나서 "이 글을 쓴 사람은 이 분야 전문가구나"라고 느낄 수 있어야 함
 
-【제목-내용 SEO 연관성 — 핵심 규칙】
+【네이버 SEO 구조 규칙 — 핵심】
 - 선택된 제목이 약속하는 내용을 본문에서 반드시 충족할 것
-- 제목의 핵심 키워드가 첫 번째 소제목 또는 첫 단락에 자연스럽게 등장할 것
 - 제목 형식(질문형/가이드형 등)에 맞는 본문 구조를 사용할 것
+- 첫 번째 단락 첫 문장에 핵심 키워드 반드시 포함 (D.I.A+ 첫 200자 가산점)
+- 주요 소제목(H2) 중 절반 이상에 핵심 키워드 또는 연관어 포함
+- 각 주요 소제목(H2) 아래에 세부 소제목(H3)을 1~2개 작성할 것
+  세부 소제목 형식: 반드시 ▶ 기호로 시작하는 독립 줄 (예: ▶ 디스크가 눌리는 정확한 위치)
 
 【절대 금지 - 서식 규칙】
 - #, ##, ###, **텍스트**, *텍스트*, ---, ***, ~~~, == 등 마크다운 기호 절대 사용 금지
 - 볼드, 이탤릭 서식 기호 절대 사용 금지
 - 목록 기호(-, *, •, 1.) 절대 사용 금지
-- 이모지 사용 금지
+- 이모지 사용 금지 (▶ 기호만 세부 소제목에 허용)
 - AI가 쓴 것처럼 보이는 표현 금지: "먼저", "또한", "따라서", "이처럼", "정리하자면", "중요한 것은", "핵심은", "결론적으로"
 
 【자연스러운 글쓰기 원칙】
 - 소제목은 검색하는 사람 입장에서 궁금할 법한 말투로
-- 소제목 앞뒤 빈 줄로만 구분, 기호 없음
+- 주요 소제목 앞뒤 빈 줄로만 구분, 기호 없음
 - 문장마다 시작 방식을 다르게 (같은 패턴 반복 금지)
 - 짧은 문장과 긴 문장을 불규칙하게 섞기
 - 전문적이지만 어렵지 않은 표현 사용 (환자가 이해할 수 있는 수준)
@@ -87,30 +98,39 @@ ${MEDICAL_COMPLIANCE_SYSTEM_PROMPT}
 
 제목: "${title}"
 핵심 키워드: "${keyword}"
+연관 롱테일 키워드 (본문 전체에 자연스럽게 분산 포함): ${longtailKeywords.join(', ')}
 병원 유형: ${hospitalType || '일반 병원'}
 추가 정보: ${additionalInfo || '없음'}
 
 ${formatGuide}
+
+【네이버 SEO 키워드 배치 — 반드시 준수】
+- 첫 번째 단락의 첫 문장에 "${keyword}" 반드시 포함 (D.I.A+ 가산점)
+- 주요 소제목(H2) 중 2개 이상에 "${keyword}" 또는 연관 롱테일 키워드 포함
+- 연관 롱테일 키워드(${longtailKeywords.join(', ')})를 각각 자연스러운 위치에 분산 배치
+
+【소제목 계층 구조 — 반드시 준수】
+- 주요 소제목(H2): 4~5개, 기호 없이 독립 줄 (앞뒤 빈 줄)
+- 세부 소제목(H3): 각 H2 아래 1~2개, 반드시 ▶ 기호로 시작 (예: ▶ 진단 방법과 검사 종류)
+- H3는 H2보다 짧고 구체적인 주제 (15~25자)
 
 【전문성 작성 기준】
 - 의학적 원인을 해부학적·생리학적으로 설명 (단순 나열 금지)
 - 진단 기준 또는 증상 판별 기준을 구체적으로 서술
 - 치료 방법은 보존적 → 비수술적 → 수술적 순서로 단계 안내
 - 예방·관리는 임상 근거가 있는 구체적 행동 지침으로 제시
-- 독자가 읽고 나서 "병원에 가기 전에 알아야 할 것을 다 알게 됐다"고 느낄 수 있는 깊이
 
 【작성 조건】
-- 총 1,500~1,800자 (공백 포함, 전문성 확보를 위해 이전보다 충분한 분량)
+- 총 1,500~1,800자 (공백 포함)
 - 의료광고법 준수 (완치, 최고, 100% 등 표현 금지)
-- 소제목 4~5개 (기호 없이, 한 줄, 자연스러운 말투)
-- 키워드 "${keyword}" 4~6회 자연스럽게 포함 (무리한 반복 금지)
+- 핵심 키워드 "${keyword}" 4~6회 자연스럽게 포함
 - 각 소제목 아래 단락 2~3개 (2~4문장씩)
 - 이미지 위치는 [이미지 N: 설명] 형식으로 소제목 아래 표시 (총 5~6개)
 - 마지막 문장: "개인마다 차이가 있을 수 있으니, 전문의와 상담 후 결정하시길 권해드립니다."
 
 【절대 쓰지 말 것】
 - "먼저", "또한", "따라서", "이처럼", "정리하자면", "중요한 것은", "결론적으로" 같은 AI 티 나는 표현
-- # ## ** * - 등 마크다운 기호
+- # ## ** * - 등 마크다운 기호 (▶ 제외)
 - 모든 단락을 같은 방식으로 시작하는 것
 - 막연하고 추상적인 표현 ("도움이 될 수 있습니다" 남발 금지 — 구체적 내용으로 대체)
 
@@ -145,16 +165,33 @@ ${formatGuide}
       .replace(/(?<!\[이미지[^\]]*)-{2,}/g, '') // 남은 -- --- 제거 (이미지 태그 제외)
       .replace(/\n{3,}/g, '\n\n')            // 3줄 이상 빈줄 → 2줄로
       .trim();
-    const charCount = body.replace(/\[이미지\s*\d+:[^\]]*\]/g, '').length;
+    const bodyForCount = body.replace(/\[이미지\s*\d+:[^\]]*\]/g, '');
+    const charCount = bodyForCount.length;
     const compliance = checkCompliance(body);
 
     // SEO 분석
-    const paragraphCount = (body.split(/\n\n+/).filter(p => p.trim().length > 20)).length;
+    // H2: 앞뒤 빈 줄로 둘러싸인 단독 줄 (15~45자, ▶ 시작 아님)
+    const h2Matches = body.match(/(?:^|\n\n)([^\n▶][^\n]{14,44})(?:\n\n)/g) || [];
+    const h2Count = h2Matches.length;
+    // H3: ▶ 로 시작하는 줄
+    const h3Matches = body.match(/^▶.+/gm) || [];
+    const h3Count = h3Matches.length;
     const keywordCount = (body.toLowerCase().split(keyword.toLowerCase()).length - 1);
+    // 첫 200자 키워드 포함 여부
+    const firstParaKeyword = body.slice(0, 200).toLowerCase().includes(keyword.toLowerCase());
+    // 소제목 내 키워드 포함 수
+    const subheadingWithKeyword = h2Matches.filter(m => m.toLowerCase().includes(keyword.toLowerCase())).length;
+    // 롱테일 키워드 커버리지
+    const longtailCoverage = longtailKeywords.filter(lk => body.includes(lk)).length;
     const estimatedReadingTime = Math.ceil(charCount / 500);
-    const structureScore = Math.min(100, paragraphCount * 8 + (keywordCount >= 3 && keywordCount <= 6 ? 30 : 10));
-    const h2Count = paragraphCount;
-    const h3Count = 0;
+    const structureScore = Math.min(100,
+      h2Count * 10 +
+      h3Count * 5 +
+      (keywordCount >= 4 && keywordCount <= 6 ? 20 : 10) +
+      (firstParaKeyword ? 10 : 0) +
+      (subheadingWithKeyword >= 2 ? 10 : 5) +
+      Math.min(longtailCoverage * 3, 15)
+    );
 
     // 이미지 가이드라인
     const imageMatches = body.match(/\[이미지\s*\d+:\s*([^\]]+)\]/g) || [];
@@ -179,6 +216,10 @@ ${formatGuide}
         h3Count,
         estimatedReadingTime,
         structureScore,
+        firstParaKeyword,
+        subheadingWithKeyword,
+        longtailCoverage,
+        longtailTotal: longtailKeywords.length,
       },
     });
   } catch (error) {
