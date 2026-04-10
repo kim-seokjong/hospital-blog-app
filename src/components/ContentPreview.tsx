@@ -10,9 +10,11 @@ interface ContentPreviewProps {
   isLoadingImages: boolean;
   imageStyle: 'photo' | 'cardnews' | 'upload';
   onImageStyleChange: (style: 'photo' | 'cardnews' | 'upload') => void;
+  onGenerateSlides?: () => void;
+  isLoadingSlides?: boolean;
 }
 
-export default function ContentPreview({ content, onGenerateImages, onImagesUploaded, isLoadingImages, imageStyle, onImageStyleChange }: ContentPreviewProps) {
+export default function ContentPreview({ content, onGenerateImages, onImagesUploaded, isLoadingImages, imageStyle, onImageStyleChange, onGenerateSlides, isLoadingSlides }: ContentPreviewProps) {
   const [imageCount, setImageCount] = useState(6);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
@@ -280,6 +282,31 @@ export default function ContentPreview({ content, onGenerateImages, onImagesUplo
                 <><span>{imageStyle === 'cardnews' ? '🎨' : '📷'}</span> {imageStyle === 'cardnews' ? '카드뉴스' : '실사 이미지'} {imageCount}장 생성</>
               )}
             </button>
+          )}
+
+          {/* 디자인 카드뉴스 */}
+          {onGenerateSlides && (
+            <div className="border-t border-gray-100 pt-3">
+              <p className="text-xs font-bold text-gray-600 mb-2">인포그래픽 카드뉴스</p>
+              <button
+                onClick={onGenerateSlides}
+                disabled={isLoadingSlides}
+                className="w-full py-3 bg-sky-500 hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+              >
+                {isLoadingSlides ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    슬라이드 생성 중...
+                  </>
+                ) : (
+                  <><span>✦</span> 디자인 카드뉴스 3장 생성</>
+                )}
+              </button>
+              <p className="text-[10px] text-gray-400 mt-1.5 text-center">표지 · 단계 · 마무리 슬라이드 · 1080×1080 PNG</p>
+            </div>
           )}
         </div>
       </div>

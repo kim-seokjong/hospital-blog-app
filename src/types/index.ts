@@ -83,3 +83,44 @@ export interface GeneratedImage {
 }
 
 export type AppStep = 'keyword' | 'titles' | 'content' | 'images' | 'preview';
+
+export interface SlideStyleConfig {
+  name: string;
+  emoji: string;
+  bgGradient: [string, string];
+  accentColor: string;
+  accentTextColor: string;
+  mainTextColor: string;
+  subTextColor: string;
+  boxFillColor: string;
+  infoBgColor: string;
+  decorColor: string;
+  dividerColor: string;
+  tagBgColor: string;
+}
+
+export interface CardNewsTopic {
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+export interface CardNewsStep {
+  num: string;
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+export interface CardNewsData {
+  hospitalName: string;
+  coverTitle: string;
+  coverSubtitle: string;
+  coverTopics: CardNewsTopic[];
+  stepsTitle: string;
+  steps: CardNewsStep[];
+  conclusionSub: string;
+  conclusionTitle: string;
+  conclusionPoints: string[];
+  footerText: string;
+}

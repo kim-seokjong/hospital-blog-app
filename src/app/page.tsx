@@ -6,11 +6,12 @@ import KeywordTrend from '@/components/KeywordTrend';
 import TitleSelector from '@/components/TitleSelector';
 import ContentPreview from '@/components/ContentPreview';
 import ImageGallery from '@/components/ImageGallery';
+import CardNewsDesigner from '@/components/CardNewsDesigner';
 import SeoAnalysis from '@/components/SeoAnalysis';
 import OriginalityChecker from '@/components/OriginalityChecker';
 import TagPanel from '@/components/TagPanel';
 import NaverPreview from '@/components/NaverPreview';
-import type { BlogTitle, BlogContent, GeneratedImage, TagResult } from '@/types';
+import type { BlogTitle, BlogContent, GeneratedImage, TagResult, CardNewsData } from '@/types';
 
 export default function HomePage() {
   const [keyword, setKeyword] = useState('');
@@ -27,8 +28,10 @@ export default function HomePage() {
   const [loadingContent, setLoadingContent] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
   const [loadingTags, setLoadingTags] = useState(false);
+  const [loadingSlides, setLoadingSlides] = useState(false);
   const [lastImageCount, setLastImageCount] = useState(6);
   const [imageStyle, setImageStyle] = useState<'photo' | 'cardnews' | 'upload'>('cardnews');
+  const [cardNewsData, setCardNewsData] = useState<CardNewsData | null>(null);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -65,6 +68,7 @@ export default function HomePage() {
     setContent(null);
     setImages([]);
     setTags(null);
+    setCardNewsData(null);
     setError(null);
     setLoadingContent(true);
 
@@ -132,6 +136,32 @@ export default function HomePage() {
       setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
     } finally {
       setLoadingImages(false);
+    }
+  };
+
+  const handleGenerateSlides = async () => {
+    if (!selectedTitle || !content) return;
+    setCardNewsData(null);
+    setError(null);
+    setLoadingSlides(true);
+    try {
+      const res = await fetch('/api/generate-cardnews-slides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keyword,
+          title: selectedTitle.title,
+          body: content.body,
+          hospitalType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '카드뉴스 생성에 실패했습니다.');
+      setCardNewsData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
+    } finally {
+      setLoadingSlides(false);
     }
   };
 
@@ -252,6 +282,8 @@ export default function HomePage() {
                   isLoadingImages={loadingImages}
                   imageStyle={imageStyle}
                   onImageStyleChange={setImageStyle}
+                  onGenerateSlides={handleGenerateSlides}
+                  isLoadingSlides={loadingSlides}
                 />
                 <SeoAnalysis content={content} />
                 <OriginalityChecker
@@ -289,6 +321,13 @@ export default function HomePage() {
                 style={imageStyle}
                 onRegenerate={() => handleGenerateImages(lastImageCount)}
                 isLoading={loadingImages}
+              />
+            )}
+
+            {cardNewsData && (
+              <CardNewsDesigner
+                data={cardNewsData}
+                keyword={keyword}
               />
             )}
           </div>
